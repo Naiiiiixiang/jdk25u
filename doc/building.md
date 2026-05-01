@@ -6,11 +6,17 @@ If you are eager to try out building the JDK, these simple steps work most of
 the time. They assume that you have installed Git (and Cygwin, MSYS2 or WSL if
 running on Windows), and want to clone the main-line JDK repository.
 
- 1. [Get the complete source code](#getting-the-source-code): \
-    `git clone https://git.openjdk.org/jdk`
+1. [Get the complete source code](#getting-the-source-code): \
+   `git clone https://git.openjdk.org/jdk`
 
- 2. [Run configure](#running-configure): \
-    `bash configure`
+2. [Run configure](#running-configure): \
+   `bash configure`
+   ```bash
+    METAL_TC="$(xcodebuild -showComponent MetalToolchain -json | plutil -extract toolchainSearchPath raw -o - -)"
+
+    PATH="$METAL_TC/Metal.xctoolchain/usr/bin:$PATH" \
+      bash configure --with-num-cores=10 --with-memory-size=65536
+    ```
 
     If `configure` fails due to missing dependencies (to either the
     [toolchain](#native-compiler-toolchain-requirements), [build tools](
@@ -283,7 +289,9 @@ installed:
 Often, you can install these packages using the following command line:
 
 ```
+
 <path to Cygwin setup>/setup-x86_64 -q -P autoconf -P make -P unzip -P zip
+
 ```
 
 Unfortunately, Cygwin can be unreliable in certain circumstances. If you
@@ -308,7 +316,9 @@ installed:
 You can install these packages using the following command line:
 
 ```
+
 pacman -S autoconf tar make zip unzip
+
 ```
 
 #### Windows Subsystem for Linux (WSL)
@@ -369,20 +379,26 @@ will most likely need to install developer packages.
 For apt-based distributions (Debian, Ubuntu, etc), try this:
 
 ```
+
 sudo apt-get install build-essential autoconf
+
 ```
 
 For rpm-based distributions (Fedora, Red Hat, etc), try this:
 
 ```
+
 sudo yum groupinstall "Development Tools"
+
 ```
 
 For Alpine Linux, aside from basic tooling, install the GNU versions of some
 programs:
 
 ```
+
 sudo apk add build-base bash grep zip
+
 ```
 
 ### AIX
@@ -496,7 +512,10 @@ or you can run it on the command line. For this to work, you need to start
 that the " characters are essential)
 
 ```
-"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe" modify --channelId VisualStudio.16.Release --productId Microsoft.VisualStudio.Product.BuildTools --addProductLang en-us -p
+
+"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe" modify --channelId VisualStudio.16.Release
+--productId Microsoft.VisualStudio.Product.BuildTools --addProductLang en-us -p
+
 ```
 
 `VisualStudio.16.Release` represent VS 2019, so adjust the version number
@@ -668,7 +687,9 @@ If `configure` has problems locating your installation of autoconf, you can
 specify it using the `AUTOCONF` environment variable, like this:
 
 ```
+
 AUTOCONF=<path to autoconf> configure ...
+
 ```
 
 ### GNU Make
@@ -718,7 +739,9 @@ The configuration is created by the `configure` script. The basic invocation of
 the `configure` script looks like this:
 
 ```
+
 bash configure [options]
+
 ```
 
 This will create an output directory containing the configuration and setup an
@@ -738,13 +761,17 @@ Some command line examples:
 * Create a 32-bit build for Windows with FreeType2 in `C:\freetype-i586`:
 
   ```
-  bash configure --with-freetype=/cygdrive/c/freetype-i586 --with-target-bits=32
+
+bash configure --with-freetype=/cygdrive/c/freetype-i586 --with-target-bits=32
+
   ```
 
 * Create a debug build with the `server` JVM and DTrace enabled:
 
   ```
-  bash configure --enable-debug --with-jvm-variants=server --enable-dtrace
+
+bash configure --enable-debug --with-jvm-variants=server --enable-dtrace
+
   ```
 
 ### Common Configure Arguments
@@ -755,7 +782,9 @@ To get up-to-date information on *all* available `configure` argument, please
 run:
 
 ```
+
 bash configure --help
+
 ```
 
 (Note that this help text also include general autoconf options, like
@@ -1007,7 +1036,9 @@ version of Google Test is 1.14.0, whose source code can be obtained:
 To execute the most basic tests (tier 1), use:
 
 ```
+
 make test-tier1
+
 ```
 
 For more details on how to run tests, please see **Testing the JDK**
@@ -1163,9 +1194,11 @@ Note that alsa is needed even if you only want to build a headless JDK.
 * Install the libraries into the cross-compilation toolchain. For instance:
 
   ```
-  cd /tools/gcc-linaro-arm-linux-gnueabihf-raspbian-2012.09-20120921_linux/arm-linux-gnueabihf/libc
-  dpkg-deb -x /tmp/libasound2_1.0.25-4_armhf.deb .
-  dpkg-deb -x /tmp/libasound2-dev_1.0.25-4_armhf.deb .
+
+cd /tools/gcc-linaro-arm-linux-gnueabihf-raspbian-2012.09-20120921_linux/arm-linux-gnueabihf/libc
+dpkg-deb -x /tmp/libasound2_1.0.25-4_armhf.deb .
+dpkg-deb -x /tmp/libasound2-dev_1.0.25-4_armhf.deb .
+
   ```
 
 * If alsa is not properly detected by `configure`, you can specify it by
@@ -1205,22 +1238,26 @@ Note that X11 is needed even if you only want to build a headless JDK.
 * Install the libraries into the cross-compilation toolchain. For instance:
 
   ```
-  cd /tools/gcc-linaro-arm-linux-gnueabihf-raspbian-2012.09-20120921_linux/arm-linux-gnueabihf/libc/usr
-  mkdir X11R6
-  cd X11R6
-  for deb in /tmp/target-x11/*.deb ; do dpkg-deb -x $deb . ; done
-  mv usr/* .
-  cd lib
-  cp arm-linux-gnueabihf/* .
+
+cd /tools/gcc-linaro-arm-linux-gnueabihf-raspbian-2012.09-20120921_linux/arm-linux-gnueabihf/libc/usr
+mkdir X11R6
+cd X11R6
+for deb in /tmp/target-x11/*.deb ; do dpkg-deb -x $deb . ; done
+mv usr/* .
+cd lib
+cp arm-linux-gnueabihf/* .
+
   ```
 
   You can ignore the following messages, since these libraries are not needed
   to successfully complete a full JDK build.
 
   ```
-  cp: cannot stat `arm-linux-gnueabihf/libICE.so': No such file or directory
+
+cp: cannot stat `arm-linux-gnueabihf/libICE.so': No such file or directory
   cp: cannot stat `arm-linux-gnueabihf/libSM.so': No such file or directory
-  cp: cannot stat `arm-linux-gnueabihf/libXt.so': No such file or directory
+cp: cannot stat `arm-linux-gnueabihf/libXt.so': No such file or directory
+
   ```
 
 * If the X11 libraries are not properly detected by `configure`, you can point
@@ -1258,7 +1295,9 @@ toolchain and a sysroot environment which can easily be used together with the
 following command:
 
 ```
+
 bash configure --with-devkit=<devkit-path> --openjdk-target=ppc64-linux-gnu && make
+
 ```
 
 will configure and build the JDK for Linux/ppc64 assuming that `<devkit-path>`
@@ -1267,7 +1306,9 @@ points to a Linux/x86_64 to Linux/ppc64 devkit.
 Devkits can be created from the `make/devkit` directory by executing:
 
 ```
+
 make [ TARGETS="<TARGET_TRIPLET>+" ] [ BASE_OS=<OS> ] [ BASE_OS_VERSION=<VER> ]
+
 ```
 
 where `TARGETS` contains one or more `TARGET_TRIPLET`s of the form described in
@@ -1293,11 +1334,13 @@ successful, the new devkits can be found in the `build/devkit/result`
 subdirectory:
 
 ```
+
 cd make/devkit
 make TARGETS="ppc64le-linux-gnu aarch64-linux-gnu" BASE_OS=Fedora BASE_OS_VERSION=21
 ls -1 ../../build/devkit/result/
 x86_64-linux-gnu-to-aarch64-linux-gnu
 x86_64-linux-gnu-to-ppc64le-linux-gnu
+
 ```
 
 Notice that devkits are not only useful for targeting different build
@@ -1324,34 +1367,40 @@ For example, cross-compiling to AArch64 from x86_64 could be done like this:
 * Install cross-compiler on the *build* system:
 
   ```
-  apt install g++-aarch64-linux-gnu gcc-aarch64-linux-gnu
+
+apt install g++-aarch64-linux-gnu gcc-aarch64-linux-gnu
+
   ```
 
 * Create chroot on the *build* system, configuring it for *target* system:
 
   ```
-  sudo debootstrap \
-    --arch=arm64 \
-    --verbose \
-    --include=fakeroot,symlinks,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev,libffi-dev \
-    --resolve-deps \
-    buster \
-    ~/sysroot-arm64 \
-    https://httpredir.debian.org/debian/
+
+sudo debootstrap \
+--arch=arm64 \
+--verbose \
+--include=fakeroot,symlinks,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev,libffi-dev \
+--resolve-deps \
+buster \
+~/sysroot-arm64 \
+https://httpredir.debian.org/debian/
+
   ```
 
 * To create an Ubuntu-based chroot:
 
   ```
-  sudo debootstrap \
-    --arch=arm64 \
-    --verbose \
-    --components=main,universe \
-    --include=fakeroot,symlinks,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev,libffi-dev \
-    --resolve-deps \
-    jammy \
-    ~/sysroot-arm64 \
-    http://ports.ubuntu.com/ubuntu-ports/
+
+sudo debootstrap \
+--arch=arm64 \
+--verbose \
+--components=main,universe \
+--include=fakeroot,symlinks,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev,libffi-dev \
+--resolve-deps \
+jammy \
+~/sysroot-arm64 \
+http://ports.ubuntu.com/ubuntu-ports/
+
   ```
 
   Note that `symlinks` is in the universe repository.
@@ -1360,17 +1409,21 @@ For example, cross-compiling to AArch64 from x86_64 could be done like this:
   locations:
 
   ```
-  sudo chroot ~/sysroot-arm64 symlinks -cr .
+
+sudo chroot ~/sysroot-arm64 symlinks -cr .
+
   ```
 
 * Configure and build with newly created chroot as sysroot/toolchain-path:
 
   ```
-  sh ./configure \
-    --openjdk-target=aarch64-linux-gnu \
-    --with-sysroot=~/sysroot-arm64
-  make images
-  ls build/linux-aarch64-server-release/
+
+sh ./configure \
+--openjdk-target=aarch64-linux-gnu \
+--with-sysroot=~/sysroot-arm64
+make images
+ls build/linux-aarch64-server-release/
+
   ```
 
 The build does not create new files in that chroot, so it can be reused for
@@ -1430,34 +1483,41 @@ the path where you want to install the toolchain.
 * Install the RISC-V GNU compiler toolchain:
 
   ```
-  git clone --recursive https://github.com/riscv-collab/riscv-gnu-toolchain
-  cd riscv-gnu-toolchain
-  ./configure --prefix=<toolchain-installed-path>
-  make linux
-  export PATH=<toolchain-installed-path>/bin:$PATH
+
+git clone --recursive https://github.com/riscv-collab/riscv-gnu-toolchain
+cd riscv-gnu-toolchain
+./configure --prefix=<toolchain-installed-path>
+make linux
+export PATH=<toolchain-installed-path>/bin:$PATH
+
   ```
 
 * Cross-compile all the required libraries:
 
   ```
-  # An example for libffi
-  git clone https://github.com/libffi/libffi
-  cd libffi
-  ./configure --host=riscv64-unknown-linux-gnu --prefix=<toolchain-installed-path>/sysroot/usr
-  make
-  make install
+
+# An example for libffi
+
+git clone https://github.com/libffi/libffi
+cd libffi
+./configure --host=riscv64-unknown-linux-gnu --prefix=<toolchain-installed-path>/sysroot/usr
+make
+make install
+
   ```
 
 * Configure and build the JDK:
 
   ```
-  bash configure \
-    --with-boot-jdk=$BOOT_JDK \
-    --openjdk-target=riscv64-linux-gnu \
-    --with-sysroot=<toolchain-installed-path>/sysroot \
-    --with-toolchain-path=<toolchain-installed-path>/bin \
-    --with-extra-path=<toolchain-installed-path>/bin
-  make images
+
+bash configure \
+--with-boot-jdk=$BOOT_JDK \
+--openjdk-target=riscv64-linux-gnu \
+--with-sysroot=<toolchain-installed-path>/sysroot \
+--with-toolchain-path=<toolchain-installed-path>/bin \
+--with-extra-path=<toolchain-installed-path>/bin
+make images
+
   ```
 
 #### Building for musl
@@ -1469,12 +1529,14 @@ suitable for most target CPU architectures can be obtained from
 sysroot, configure the build with `--openjdk-target`:
 
 ```
+
 sh ./configure --with-jvm-variants=server \
 --with-boot-jdk=$BOOT_JDK \
 --with-build-jdk=$BUILD_JDK \
 --openjdk-target=x86_64-unknown-linux-musl \
 --with-devkit=$DEVKIT \
 --with-sysroot=$SYSROOT
+
 ```
 
 and run `make` normally.
@@ -1486,11 +1548,13 @@ Windows AArch64 machine for a native build, launch the installer as follows
 in a Windows command prompt:
 
 ```
+
 vs_buildtools.exe --quiet --wait --norestart --nocache ^
 --installPath "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools" ^
 --add Microsoft.VisualStudio.Component.VC.CoreBuildTools ^
 --add Microsoft.VisualStudio.Component.VC.Tools.ARM64 ^
 --add Microsoft.VisualStudio.Component.Windows11SDK.22621
+
 ```
 
 To generate Windows AArch64 builds using Cygwin on a Windows x64 machine,
@@ -1608,23 +1672,27 @@ To help you, the build system will print a failure summary at the end. It looks
 like this:
 
 ```
+
 ERROR: Build failed for target 'hotspot' in configuration 'linux-x64' (exit code 2)
 
 === Output from failing command(s) repeated here ===
+
 * For target hotspot_variant-server_libjvm_objs_psMemoryPool.o:
-/src/jdk/hotspot/src/share/vm/services/psMemoryPool.cpp:1:1: error: 'failhere' does not name a type
-   ... (rest of output omitted)
+  /src/jdk/hotspot/src/share/vm/services/psMemoryPool.cpp:1:1: error: 'failhere' does not name a type
+  ... (rest of output omitted)
 
 * All command lines available in /src/jdk/build/linux-x64/make-support/failure-logs.
-=== End of repeated output ===
+  === End of repeated output ===
 
 === Make failed targets repeated here ===
-lib/CompileJvm.gmk:207: recipe for target '/src/jdk/build/linux-x64/hotspot/variant-server/libjvm/objs/psMemoryPool.o' failed
+lib/CompileJvm.gmk:207: recipe for target '/src/jdk/build/linux-x64/hotspot/variant-server/libjvm/objs/psMemoryPool.o'
+failed
 make/Main.gmk:263: recipe for target 'hotspot-server-libs' failed
 === End of repeated output ===
 
 HELP: Try searching the build log for the name of the first failed target.
 HELP: Run 'make doctor' to diagnose build problems.
+
 ```
 
 Let's break it down! First, the selected configuration, and the top-level
@@ -1701,12 +1769,14 @@ just an indication about a potential problem.
 The output from `make doctor` can look like this:
 
 ```
+
 "make doctor" will help you analyze your build environment. It can highlight
 certain well-known problems, but it can never find all possible errors.
 
 * Verifying that configure has picked up git...
 
 * Checking for warnings from configure...
+
  ---
 The following warnings were produced. Repeated here for convenience:
 WARNING: pandoc is version 3.1.9, not the recommended version 2.19.2
@@ -1714,16 +1784,18 @@ WARNING: pandoc is version 3.1.9, not the recommended version 2.19.2
 ! Inspect the warnings, fix any problems, and re-run configure
 
 * Checking for left-over core files...
-Found these potential core files. They might interfere with the build process:
+  Found these potential core files. They might interfere with the build process:
+
  ---
 src/hotspot/core.1337
- ---
+---
 ! Remove left-over core files
 
 * Checking for untracked files with illegal names...
 
 * If all else fails, try removing the entire build directory and re-creating
-the same configuration using:
+  the same configuration using:
+
  ---
 configure_command_line=$(make print-configuration)
 make dist-clean
@@ -1731,9 +1803,10 @@ bash configure $configure_command_line
  ---
 
 * The build README (doc/building.md) is a great source of information,
-especially the chapter "Fixing Unexpected Build Failures". Check it out!
+  especially the chapter "Fixing Unexpected Build Failures". Check it out!
 
 * If you still need assistance please contact build-dev@openjdk.org.
+
 ```
 
 #### Problems with the Build Environment
@@ -1806,8 +1879,10 @@ order. Most issues will be solved at step 1 or 2.
 If you get an error message like this:
 
 ```
+
 File 'xxx' has modification time in the future.
 Clock skew detected. Your build may be incomplete.
+
 ```
 
 then the clock on your build machine is out of sync with the timestamps on the
@@ -1824,9 +1899,11 @@ clean` and restart the build.
 On Windows, you might get error messages like this:
 
 ```
+
 fatal error - couldn't allocate heap
 cannot create ... Permission denied
 spawn failed
+
 ```
 
 This can be a sign of a Cygwin problem. See the information about solving
@@ -1894,9 +1971,11 @@ string using `--with-version-string=<your version>`.
 This is a typical example of how to build the JDK in a reproducible way:
 
 ```
+
 export SOURCE_DATE_EPOCH=946684800
 bash configure --with-version-opt=adhoc
 make
+
 ```
 
 Note that regardless of whether you specify a source date for `configure` or
@@ -1970,17 +2049,19 @@ be the command to run. One way to achieve this is to add a simple helper script
 to your path:
 
 ```
+
 cat << EOT > /tmp/configure
 #!/bin/bash
 if [ \$(pwd) = \$(cd \$(dirname \$0); pwd) ] ; then
-  echo >&2 "Abort: Trying to call configure helper recursively"
-  exit 1
+echo >&2 "Abort: Trying to call configure helper recursively"
+exit 1
 fi
 
 bash \$PWD/configure "\$@"
 EOT
 chmod +x /tmp/configure
 sudo mv /tmp/configure /usr/local/bin
+
 ```
 
 Now `configure --en<tab>-dt<tab>` will result in `configure --enable-dtrace`.
@@ -2130,6 +2211,7 @@ name>`, which we refer to as `$BUILD` in this document. The `$BUILD` directory
 contains the following important directories:
 
 ```
+
 buildtools/
 configure-support/
 hotspot/
@@ -2139,6 +2221,7 @@ make-support/
 support/
 test-results/
 test-support/
+
 ```
 
 This is what they are used for:
@@ -2208,18 +2291,22 @@ One way is to define the environment variable `DEBUG_FIXPATH`, e.g.
 an output like this:
 
 ```
+
 fixpath: debug: input: ls /mnt/c/windows
 fixpath: debug: output: ls c:\windows
+
 ```
 
 You can also call fixpath yourself manually with your paths to see how they are
 translated. For this, use `print` and `import`. For example:
 
 ```
+
 $ bash make/scripts/fixpath.sh print /mnt/c/windows
 c:\windows
 $ bash make/scripts/fixpath.sh import "c:\\windows"
 /mnt/c/windows
+
 ```
 
 Remember that backslash is used as an escape character in the shell, and needs
@@ -2283,12 +2370,14 @@ compile all classes in the `jdk.internal.foo` package in the `jdk.foo` module,
 a call like this would be made:
 
 ```
+
 $(eval $(call SetupJavaCompilation, BUILD_FOO_CLASSES, \
-    SETUP := GENERATE_OLDBYTECODE, \
-    SRC := $(TOPDIR)/src/jkd.foo/share/classes, \
-    INCLUDES := jdk/internal/foo, \
-    BIN := $(SUPPORT_OUTPUTDIR)/foo_classes, \
+SETUP := GENERATE_OLDBYTECODE, \
+SRC := $(TOPDIR)/src/jkd.foo/share/classes, \
+INCLUDES := jdk/internal/foo, \
+BIN := $(SUPPORT_OUTPUTDIR)/foo_classes, \
 ))
+
 ```
 
 By encapsulating and expressing the high-level knowledge of *what* should be
@@ -2310,7 +2399,9 @@ To automatically build two consecutive versions and compare them, use
 assignments, like this:
 
 ```
+
 make COMPARE_BUILD=CONF=--enable-new-hotspot-feature:MAKE=hotspot
+
 ```
 
 See `make/InitSupport.gmk` for details on how to use `COMPARE_BUILD`.
